@@ -1,7 +1,7 @@
 **Neurodegenerative Diseases: Patient Monitoring System with Anomaly Detection**
 
 LINKS : 
-https://github.com/UniSalento-IDALab-IoTCourse-2021-2022/wot-project-part2-MarcoStabile
+https://github.com/UniSalento-IDALab-IoTCourse-2021-2022/wot-project-part1-MarcoStabile
 https://github.com/UniSalento-IDALab-IoTCourse-2021-2022/wot-project-part3-MarcoStabile
 
 **SECOND PART: SERVER SIDE**
