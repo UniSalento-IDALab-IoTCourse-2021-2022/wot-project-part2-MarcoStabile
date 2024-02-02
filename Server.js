@@ -172,34 +172,6 @@ app.post('/api/update_anomaly', async (req, res) => {
         value,
         timestamp,
     });
-
-    /*switch (anomaly_type) {
-        case 'temperature':
-            if (value > 38.0) {
-                const alertMessage = `High temperature alert for ${patient}: ${value}`;
-                res.json(alertMessage)
-                // Implement actions for high temperature alert (e.g., send notification)
-            }
-            break;
-        case 'bpm':
-            if (value < 60 || value > 100) {
-                const alertMessage = `Abnormal BPM alert for ${mac_address}: ${value}`;
-                res.json(alertMessage)
-                // Implement actions for abnormal BPM alert (e.g., send notification)
-            }
-            break;
-        case 'fall_detection':
-            if (value === true) {
-                const alertMessage = `Fall detected for ${mac_address}`;
-                res.json(alertMessage)
-                // Implement actions for fall detection (e.g., send emergency alert)
-            }
-            break;
-        // Add additional cases for other anomaly types if needed
-    }*/
-
-    // Perform actions based on the type of anomaly (example: send alert, notification, etc.)
-    //handleAnomalyActions(patient, mac_address, anomaly_type, value);
 });
 
 // Function to find the latest "found" status for a patient in any room
@@ -253,36 +225,6 @@ app.get('/api/get_patientData', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-
-// Function to handle actions based on the type of anomaly
-function handleAnomalyActions(socket, patient, mac_address, anomaly_type, value) {
-    // Example: Send alert or notification based on anomaly type
-    switch (anomaly_type) {
-        case 'temperature':
-            if (value > 38.0) {
-                const alertMessage = `High temperature alert for ${patient}: ${value}`;
-                socket.send(JSON.stringify({ type: 'anomaly', data: alertMessage }));
-                // Implement actions for high temperature alert (e.g., send notification)
-            }
-            break;
-        case 'bpm':
-            if (value < 60 || value > 100) {
-                const alertMessage =`Abnormal BPM alert for ${mac_address}: ${value}`;
-                socket.send(JSON.stringify({ type: 'anomaly', data: alertMessage }));
-                // Implement actions for abnormal BPM alert (e.g., send notification)
-            }
-            break;
-        case 'fall_detection':
-            if (value === true) {
-                const alertMessage =`Fall detected for ${mac_address}`;
-                socket.send(JSON.stringify({ type: 'anomaly', data: alertMessage }));
-                // Implement actions for fall detection (e.g., send emergency alert)
-            }
-            break;
-        // Add additional cases for other anomaly types if needed
-    }
-}
 
 // Define a function to find the latest anomaly for a given mac_address
 async function findLatestAnomaly(db, mac_address) {
