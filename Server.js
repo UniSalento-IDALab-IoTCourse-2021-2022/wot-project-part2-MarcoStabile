@@ -24,11 +24,27 @@ wss.on('connection', (socket) => {
 });
 
 // Create an object to link mac_address to patient
-const macAddressToPatient = {
-    "D7:DA:5D:26:87:08": "Marco",
-    "E2:CB:C3:5C:C1:9A": "Luca",
-    "D8:F1:CA:B2:7A:04": "Francesco"
+let macAddressToPatient = {};
+
+// Function to fetch and update the mapping
+const fetchAndUpdateMapping = async () => {
+    try {
+        const collection = db.collection('Patients');
+        const patients = await collection.find().toArray();
+
+        // Update the local mapping variable
+        macAddressToPatient = {};
+        patients.forEach(patient => {
+            macAddressToPatient[patient.mac_address] = patient.Name; // Use 'Name' instead of 'name'
+        });
+
+        console.log('Initial Mapping:', macAddressToPatient);
+    } catch (error) {
+        console.error(`Error fetching and updating MAC address mapping: ${error.message}`);
+    }
 };
+
+fetchAndUpdateMapping();
 
 // Function to send anomaly alert to all connected clients
 function broadcastAnomalyAlert(anomalyData) {
@@ -111,18 +127,6 @@ app.post('/api/update_location', async (req, res) => {
     }
 });
 
-// API endpoint to handle the case when no devices are found
-app.post('/api/no_devices_found', (req, res) => {
-    const { message, location } = req.body;
-
-    console.log(`No devices found: ${message}, Location: ${location}`);
-
-    // Perform actions based on the message or location (customize as needed)
-    // For example, send an alert, notification, or perform other relevant tasks
-
-    res.status(200).send('No devices found notification received');
-});
-
 // API endpoint to receive messages from the client
 app.post('/api/receiveMessage', (req, res) => {
     const { message } = req.body;
@@ -141,7 +145,6 @@ app.post('/api/update_anomaly', async (req, res) => {
         const db = client.db('Patients');
         // Store data in MongoDB
         const collection = db.collection('Anomalies');
-
 
         const result = await collection.insertOne({
             mac_address,
@@ -172,6 +175,7 @@ app.post('/api/update_anomaly', async (req, res) => {
         value,
         timestamp,
     });
+
 });
 
 // Function to find the latest "found" status for a patient in any room
@@ -186,7 +190,6 @@ async function findLatestPosition(db, mac_address) {
 
     return result[0] ? { location: result[0].location, timestamp: result[0].timestamp } : null;
 }
-
 
 // API endpoint to retrieve patient latest position
 app.get('/api/get_latest_position', async (req, res) => {
@@ -205,7 +208,7 @@ app.get('/api/get_latest_position', async (req, res) => {
     }
 });
 
-// Add this route handler to your existing server-side code
+// API endpoint to retrieve patient data
 app.get('/api/get_patientData', async (req, res) => {
     try {
         const client = new MongoClient(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -226,7 +229,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
 
-// Define a function to find the latest anomaly for a given mac_address
+// Function to find the latest anomaly for a given mac_address
 async function findLatestAnomaly(db, mac_address) {
     const collection = db.collection('Anomalies');
 
@@ -241,7 +244,7 @@ async function findLatestAnomaly(db, mac_address) {
     return result[0]; // Return the latest anomaly or null if not found
 }
 
-// Define the API endpoint to retrieve the latest anomaly
+// API endpoint to retrieve the latest anomaly
 app.get('/api/get_latest_anomaly', async (req, res) => {
     const { mac_address } = req.query;
     const patient = macAddressToPatient[mac_address];
@@ -293,6 +296,7 @@ app.post('/api/addPatient', async (req, res) => {
         console.log('New Patient:', newPatient);
 
         res.status(200).json({ message: 'Patient added successfully.' });
+        fetchAndUpdateMapping();
     } catch (error) {
         console.error(`Error adding patient: ${error.message}`);
         res.status(500).json({ message: 'Internal server error.' });
@@ -344,6 +348,7 @@ app.get('/api/getAnomalyHistory', async (req, res) => {
     let filterCondition = {};
 
     if (filter === 'today') {
+        // Add filter condition for today
         // Add filter condition for today
         const todayStart = new Date();
         todayStart.setUTCHours(0, 0, 0, 0);
