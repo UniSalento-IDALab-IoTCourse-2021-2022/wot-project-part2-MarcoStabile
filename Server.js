@@ -345,15 +345,20 @@ app.get('/api/getAnomalyHistory', async (req, res) => {
 
     if (filter === 'today') {
         // Add filter condition for today
+        const todayStart = new Date();
+        todayStart.setUTCHours(0, 0, 0, 0);
         filterCondition = {
-            timestamp: { $gte: new Date().setHours(0, 0, 0, 0) },
+            timestamp: { $gte: todayStart },
         };
     } else if (filter === 'yesterday') {
         // Add filter condition for yesterday
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStart = new Date();
+        yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+        yesterdayStart.setUTCHours(0, 0, 0, 0);
+        const yesterdayEnd = new Date(yesterdayStart);
+        yesterdayEnd.setUTCHours(24, 0, 0, 0);
         filterCondition = {
-            timestamp: { $gte: yesterday.setHours(0, 0, 0, 0), $lt: new Date().setHours(0, 0, 0, 0) },
+            timestamp: { $gte: yesterdayStart, $lt: yesterdayEnd },
         };
     }
 
